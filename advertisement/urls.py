@@ -18,5 +18,8 @@ urlpatterns = [
     path('sub-promotion/', AdvertisementPromotionListAPIView.as_view(), name='sub-promotion-list'),
     path('sub-promotion/<int:pk>', AdvertisementPromotionDetailAPIView.as_view(), name='sub-promotion-detail'),
     path('favorites/', AdvertisementFavoriteAPIView.as_view(), name='favorite_list_create'),
-    path('favorite_delete/', FavoriteDeleteAPIView.as_view(), name='favorite_delete')
+    path('favorite_delete/', FavoriteDeleteAPIView.as_view(), name='favorite_delete'),
+    path('statistic/<int:pk>', ShowStatisticView.as_view(), name='statistic'),
+    path('comment', CommentAPIView.as_view(), name='comment'),
+    path('comment/<int:pk>', CommentDetailAPIView.as_view(), name='comment-detail'),
 ]
