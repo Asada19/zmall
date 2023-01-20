@@ -38,18 +38,12 @@ class JWTAuthentication(authentication.BaseAuthentication):
         return self._authenticate_credentials(request, token)
 
     def _authenticate_credentials(self, request, token):
-        print(token)
-        print('TRYING TO DECODE TOKEN')
-        print(decode_jwt(token))
 
         try:
             payload = decode_jwt(token)
         except:
             raise exceptions.AuthenticationFailed('Authentication error. Cannot decode token')
 
-
-        # if payload['exp'] > timezone.now():
-        #     raise exceptions.AuthenticationFailed('Token has expired')
 
         try:
             user = User.objects.get(pk=payload['user'])

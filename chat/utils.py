@@ -10,29 +10,6 @@ db = client[settings.MONGO_INITDB_DATABASE]
 ads = db['ads']
 
 
-async def create_chat_room(ad_id, user_id):
-    if not await ads.find_one({"ad_id": ad_id}):
-        await ads.insert_one({
-            "ad_id": ad_id,
-            "chat_rooms": [
-                {
-                    "chat_room_id": user_id,
-                    "messages": []
-                }
-            ]
-        })
-    chatroom = await ads.find_one({"ad_id": ad_id, "chat_rooms.chat_room_id": user_id})
-
-    if not chatroom:
-        await ads.update_one(chatroom,
-                             {"$push":
-                                 {"chat_rooms": {
-                                     "chat_room_id": user_id,
-                                     "messages": []
-                                 }}
-                             })
-
-
 async def write_message_to_db(ad_id, user_id, message):
     chatroom = await ads.find_one({"ad_id": ad_id})
 

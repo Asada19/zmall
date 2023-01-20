@@ -56,6 +56,7 @@ class Advertisement(models.Model):
     city = models.CharField(max_length=150, blank=True)
     end_date = models.DateTimeField(blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=False)
 
     def username(self):
         return self.owner.username
@@ -94,5 +95,23 @@ class AdvertisementComment(models.Model):
     def __str__(self):
         return f"{self.advertisement} - comment"
 
+
+class Favorite(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    advertisement = models.ForeignKey(Advertisement, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+
+
+class AdvertisementStatistic(models.Model):
+    advertisement = models.ForeignKey(Advertisement, on_delete=models.CASCADE, related_name="statistic")
+    created_on = models.DateTimeField(auto_now=True)
+    ad_views = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.advertisement.id}-{self.created_on}"
+
+    class Meta:
+        verbose_name = "статистика"
+        verbose_name_plural = "статистика"
 
 

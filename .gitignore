@@ -7,5 +7,10 @@ static/
 __pycache__
 .idea/
 venv/
+core/management/commands/create_data.py
 
 dump.rdb
+celerybeat-schedule
+**/migrations/*
+*/migrations/*
+/migrations/

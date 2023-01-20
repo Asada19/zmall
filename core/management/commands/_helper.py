@@ -44,7 +44,8 @@ def parse_job(url):
         "title": title.text,
         "owner": owner,
         "description": desc[1].text,
-        "city": title.find_next("div").text
+        "city": title.find_next("div").text,
+        "is_active": True
     }
 
     advertisement, created = Advertisement.objects.get_or_create(title=data['title'], city=data['city'],
