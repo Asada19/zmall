@@ -6,7 +6,7 @@ urlpatterns = [
     path('create/', views.create_ad_view, name='create_adv'),
     # api
     path('advertisement/', AdvertisementListView.as_view(), name='advertisement-list'),
-    path('advertisement/<int:pk>', AdvertisementDetailAPIView.as_view(), name='advertisement-detail'),
+    path('advertisement/<slug:slug>', AdvertisementDetailAPIView.as_view(), name='advertisement-detail'),
     path('advertisement/add-image', AdvertisementImageAPIView.as_view(), name='add-image'),
     path('advertisement/add_promotion/', AdvertisementPromotionDetailAPIView.as_view(), name='sub-promotion-detail'),
     path('advertisement/delete_promotion/', AdvertisementPromotionDestroyAPIView.as_view(), name='sub-promotion-detail'),
@@ -15,6 +15,8 @@ urlpatterns = [
     path('category/<slug:slug>', CategoryDetailAPIView.as_view(), name='category-detail'),
     path('sub-category/', SubCategoryListAPIView.as_view(), name='sub-category-list'),
     path('sub-category/<slug:slug>', SubCategoryDetailAPIView.as_view(), name='sub-category-detail'),
+    path('sub-promotion/', AdvertisementPromotionListAPIView.as_view(), name='sub-promotion-list'),
+    path('sub-promotion/<int:pk>', AdvertisementPromotionDetailAPIView.as_view(), name='sub-promotion-detail'),
     path('favorites/', AdvertisementFavoriteAPIView.as_view(), name='favorite_list_create'),
     path('favorite_delete/', FavoriteDeleteAPIView.as_view(), name='favorite_delete')
 ]

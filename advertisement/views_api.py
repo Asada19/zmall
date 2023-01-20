@@ -79,6 +79,7 @@ class AdvertisementDetailAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Advertisement.objects.all()
     model = Advertisement
     parser_classes = (MultiPartParser, FormParser)
+    lookup_field = 'slug'
     serializer_class = AdvertisementDetailSerializer
 
 
