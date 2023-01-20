@@ -49,24 +49,33 @@ class WebsocketTest(APITestCase):
         self.access_token_us2 = refresh.create(2).access_token.token
         self.chat_room = '1/2'
         self.complete_path = 'message/{}/?token={}'.format(self.chat_room, self.access_token_us1)
-
-    async def test_can_connect_to_server(self):
-        communicator = WebsocketCommunicator(
+        self.communicator = WebsocketCommunicator(
             application=application,
             path=self.complete_path
         )
-        connected, _ = await communicator.connect()
+
+    async def test_can_connect_to_server(self):
+        connected, _ = await self.communicator.connect()
         self.assertTrue(connected)
-        await communicator.disconnect()
+
+        await self.communicator.disconnect()
 
     async def test_can_connect_to_server_not_authenticated(self):
-        complete_path = 'message/{}/?token={}'.format(self.chat_room, 'fake_access_token')
-        communicator = WebsocketCommunicator(
-            application=application,
-            path=complete_path
-        )
-        connected, _ = await communicator.connect()
+        connected, _ = await self.communicator.connect()
         self.assertFalse(connected)
-        await communicator.disconnect()
 
+        await self.communicator.disconnect()
 
+    async def test_send_message(self):
+        connected, _ = await self.communicator.connect()
+        self.assertTrue(connected)
+
+        message = {'type': 'chat_message', 'text': 'Hello, WebSocket!'}
+        await self.communicator.send_json_to(message)
+
+        response = await self.communicator.receive_json_from()
+        self.assertEqual(response, message)
+
+        await self.communicator.disconnect()
+
+        self.client.assertIsNone(await self.communicator.receive_json_from())
