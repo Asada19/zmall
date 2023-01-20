@@ -20,7 +20,8 @@ from django.conf import settings
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 
-from advertisement.views import index, IndexDetail, index_detail
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from advertisement.views import index, index_detail
 
 
 schema_view = get_schema_view(
@@ -41,9 +42,12 @@ urlpatterns = [
     path('accounts/', include('user.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('api/', include('advertisement.urls')),
+    path('api/', include('helpers.urls')),
     path('api/auth/', include('api_auth.urls')),
+    path('api/', include('chat.urls')),
     path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += staticfiles_urlpatterns()

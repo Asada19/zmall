@@ -1,13 +1,7 @@
 import jwt
 from datetime import datetime, timedelta
+from rest_framework import exceptions
 from django.conf import settings
-
-ACCESS_TOKEN_LIFETIME = timedelta(minutes=30)
-REFRESH_TOKEN_LIFETIME = timedelta(days=1)
-
-
-class TokenError(Exception):
-    pass
 
 
 def encode_jwt(payload):
@@ -47,7 +41,7 @@ class Token:
 
     def check_exp(self, current_time):
         if current_time >= self.payload['exp']:
-            raise TokenError('Token has expired')
+            raise exceptions.AuthenticationFailed('Token has expired')
 
     def set_iat(self, at_time):
         self.payload['iat'] = at_time
@@ -70,12 +64,12 @@ class Token:
 
 class AccessToken(Token):
     token_type = 'access'
-    lifetime = ACCESS_TOKEN_LIFETIME
+    lifetime = timedelta(minutes=settings.ACCESS_TOKEN_LIFETIME)
 
 
 class RefreshToken(Token):
     token_type = 'refresh'
-    lifetime = REFRESH_TOKEN_LIFETIME
+    lifetime = timedelta(minutes=settings.REFRESH_TOKEN_LIFETIME)
 
     @property
     def access_token(self):

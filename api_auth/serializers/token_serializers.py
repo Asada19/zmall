@@ -1,7 +1,8 @@
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
+from rest_framework import exceptions
 
-from api_auth.tokens import RefreshToken, AccessToken, decode_jwt, TokenError
+from api_auth.tokens import RefreshToken, AccessToken, decode_jwt
 
 User = get_user_model()
 
@@ -27,6 +28,10 @@ class TokenObtainSerializer(serializers.Serializer):
             pass
 
         user = authenticate(**authenticate_kwargs)
+
+        if not user:
+            raise exceptions.AuthenticationFailed("There is no such user listed in system")
+
         refresh = self.get_token(user.id)
 
         data = {
@@ -56,3 +61,4 @@ class AccessTokenObtainSerializer(serializers.Serializer):
         data = {"access": str(refresh.access_token)}
 
         return data
+

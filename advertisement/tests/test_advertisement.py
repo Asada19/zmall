@@ -66,7 +66,6 @@ class AdvertisementTest(APITestCase):
 
         start = time()
         response = self.client.post(reverse("advertisement-list"), data)
-
         end = time()
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)

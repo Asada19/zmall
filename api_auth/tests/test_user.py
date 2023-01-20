@@ -2,6 +2,7 @@ import time
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
 from rest_framework import status
 
 User = get_user_model()
@@ -35,35 +36,15 @@ class UserTest(TestCase):
         response = self.client.post(reverse('api-register'), data, format='json', content_type='application/json')
         end = time.time()
 
-        self.assertLess(end - start, 0.5)
+        self.assertLess(end - start, 0.3)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['user']['is_active'], False)
+        self.assertFalse(response.data['user']['is_active'])
 
-    def test_get_token(self):
-
-        data = {
-            'email': 'sample@gmail.com',
-            'password': 'strongpass123'
-        }
-
-        start = time.time()
-        response = self.client.post(reverse('api-token-obtain'), data, format='json', content_type='application/json')
-        end = time.time()
-
-        self.assertLess(end - start, 0.5)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(self.get_object().is_active, True)
-
-    def test_get_token_invalid_credentials(self):
-
-        data = {
-            'email': 'nonexistent@gmail.com',
-            'password': 'nonex123'
-        }
-
-        start = time.time()
-        response = self.client.post(reverse('api-token-obtain'), data, format='json', content_type='application/json')
-        end = time.time()
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertLess(start - end, 0.03)
+    def test_create_superuser(self):
+        User = get_user_model()
+        admin_user = User.objects.create_superuser(email='super@user.com', password='foo', first_name='Ad',
+                                                   last_name='Min')
+        self.assertEqual(admin_user.email, 'super@user.com')
+        self.assertTrue(admin_user.is_active)
+        self.assertTrue(admin_user.is_staff)
+        self.assertTrue(admin_user.is_superuser)

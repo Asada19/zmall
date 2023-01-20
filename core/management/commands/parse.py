@@ -1,6 +1,3 @@
-import json
-from twisted.internet import defer, reactor
-from scrapy.crawler import CrawlerRunner
 from django.core.management.base import BaseCommand
 
 from ._helper import parse_job_urls, parse_job

@@ -1,5 +1,16 @@
 from advertisement.models import Advertisement
 from core.db_management.connections.redis_conn import redis_db
+import re
+
+
+def validate_ip(ip):
+    regex = "^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$"
+    p = re.compile(regex)
+
+    if re.search(p, ip):
+        return "Valid IPv4"
+
+    return "Invalid IP"
 
 
 class ViewCountMiddleware:
@@ -16,6 +27,8 @@ class ViewCountMiddleware:
             ip_addr = x_forwarded_for_value.split(',')[-1].strip()
         else:
             ip_addr = meta.get('REMOTE_ADDR')
+
+        validate_ip(ip_addr)
 
         if "/api/advertisement/" not in str(request.get_full_path()) \
                 or request.method != "GET":

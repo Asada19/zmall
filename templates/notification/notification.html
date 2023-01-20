@@ -1,0 +1,9 @@
+{% if advertisement %}
+<div>
+    {% for ads in advertisement %}
+    <div>
+        {{ ads.title }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

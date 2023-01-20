@@ -1,0 +1,10 @@
+[Unit]
+Description=Server Health Check
+
+[Service]
+ExecStart=/bin/ping -c 3 127.0.0.1:8000
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target

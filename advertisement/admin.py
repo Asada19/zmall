@@ -3,10 +3,10 @@ from .models import Advertisement, AdvertisementImage, Category, SubCategory, Ad
 
 
 class AdvertisementAdmin(admin.ModelAdmin):
-    list_display = ('id', 'sub_category', 'title', 'owner', 'description', 'city', 'views', 'created_on')
-    list_filter = ('id', 'title', 'owner')
+    list_display = ('id', 'sub_category', 'is_active', 'title', 'owner', 'description', 'city', 'views', 'created_on')
+    list_filter = ('id', 'is_active', 'title', 'owner')
     search_fields = ('id', 'title',)
-    ordering = ('-created_on',)
+    ordering = ('-created_on', 'is_active')
 
 
 # class AdvertisementImageAdmin(admin.ModelAdmin):
