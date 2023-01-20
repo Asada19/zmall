@@ -56,6 +56,7 @@ class Advertisement(models.Model):
     city = models.CharField(max_length=150, blank=True)
     end_date = models.DateTimeField(blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=False)
 
     def username(self):
         return self.owner.username
@@ -95,4 +96,7 @@ class AdvertisementComment(models.Model):
         return f"{self.advertisement} - comment"
 
 
-
+class Favorite(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    advertisement = models.ForeignKey(Advertisement, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)

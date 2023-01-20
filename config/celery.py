@@ -21,7 +21,7 @@ app.conf.beat_schedule = {
         'schedule': crontab(hour=12, minute=0),
     },
     'unload_data': {
-        'task': 'core.db_management.unload_task',
-        'schedule': crontab(hour=5, minute=0),
+        'task': 'core.db_management.tasks.unload_data',
+        'schedule': crontab(hour=1, minute=0),
     }
 }

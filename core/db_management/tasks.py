@@ -5,9 +5,13 @@ from core.db_management.connections.redis_conn import redis_db
 
 @app.task
 def unload_data():
-    views = [redis_db.smembers(str(ads.id)) for ads in Advertisement.objects.all()]
-    for ads in Advertisement.objects.all():
-        view = len(redis_db.smembers(ads.id))
-        ads.views += view
-        ads.save()
+    ads = Advertisement.objects.select_related('sub_category').filter(is_active=True)
+    ads_ids = [i.id for i in ads]
+    views = [view for view in [redis_db.smembers(i) for i in ads_ids]]
+    views = [len(i) for i in views if i is not None]
+    ads_views = dict(zip(ads_ids, views))
+    for i in ads:
+        i.views += ads_views.get(i.id, 0)
+    Advertisement.objects.bulk_update(ads, ['views'])
+    print(ads.values_list('views', flat=True))
     redis_db.flushdb()

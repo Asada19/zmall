@@ -15,7 +15,7 @@ class Command(BaseCommand):
 
         for category in Category.objects.all():
             sub_categories = [SubCategory(title=f"Sub-category{index}{index}",
-                                          slug=f'sub_category{index}',
+                                          slug=f'sub_category{random.randint(1, 9999)}',
                                           category=category)
                               for index in range(1, 6)]
             SubCategory.objects.bulk_create(sub_categories)
