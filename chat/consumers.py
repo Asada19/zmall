@@ -32,11 +32,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.user_id = self.scope['url_route']['kwargs']['user_id']
         self.room_name = f"{self.ad_id}-{self.user_id}"
 
-        advertisement = await get_owner(self.ad_id)
-        if not advertisement:
+        ad_owner = await get_owner(self.ad_id)
+        if not ad_owner:
             await self.close()
 
-        if self.scope["user"].id != int(self.user_id) and self.scope["user"].id != int(advertisement):
+        if self.scope["user"].id != int(self.user_id) and self.scope["user"].id != ad_owner:
             await self.close()
 
         await self.channel_layer.group_add(

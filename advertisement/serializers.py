@@ -47,8 +47,8 @@ class AdvertisementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Advertisement
-        fields = ['id', 'title', 'slug', 'description', 'sub_category', 'price',
-                  'max_price', 'views', 'city', 'end_date', 'created_on', 'images', 'comments', 'promotions']
+        fields = ['id', 'title', 'slug', 'description', 'sub_category', 'price', 'is_active',
+                  'max_price', 'views', 'city', 'end_date', 'created_on', 'images', 'comments', 'promotion']
 
 
 class AdvertisementDetailSerializer(serializers.ModelSerializer):
