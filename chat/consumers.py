@@ -1,39 +1,61 @@
 import json
+from urllib.parse import parse_qs
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth import get_user_model
 
-from chat.models import Message
+from advertisement.models import Advertisement
+# from chat.utils import write_chatroom_to_db, write_message_to_db
+
+User = get_user_model()
+
+
+@database_sync_to_async
+def get_advertisement(ad_id):
+    try:
+        return Advertisement.objects.get(id=int(ad_id))
+    except:
+        return None
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
-    groups = ["general"]
 
     async def connect(self):
+
+        if self.scope["user"] is AnonymousUser:
+            await self.close()
+
+        self.room_name = self.scope['url_route']['kwargs']['room_name']
+        self.ad_id, self.user_id = self.room_name.split("-")
+        advertisement = await get_advertisement(self.ad_id)
+        if self.scope["user"].id != int(self.user_id) and self.scope["user"].id != int(advertisement.owner.id):
+            await self.close()
+
+        await self.channel_layer.group_add(
+            self.room_name,
+            self.channel_name
+        )
+
+        # await write_chatroom_to_db({"advertisement": advertisement.id,
+        #                             "customer": self.user_id})
+
         await self.accept()
-        if self.scope["user"] is not AnonymousUser:
-            self.user_id = self.scope["user"].id
-            # print(self.user_id)
-            print('socket opened')
-            await self.channel_layer.group_add(f"{self.user_id}-message", self.channel_name)
+
+    async def receive(self, text_data):
+        await self.channel_layer.group_send(
+            self.room_name,
+            {"type": "chat_message",
+             "text": text_data,
+             "sender": f'{self.scope["user"].first_name} {self.scope["user"].last_name}'}
+        )
+
+    async def chat_message(self, event):
+        message = event["text"]
+        sender = event["sender"]
+
+        await self.send(text_data=f"{sender}: {message}")
 
     async def disconnect(self, code):
-        print("IT IS DISCONNECTED")
-        print(code)
-
-    async def send_info_to_user_group(self, event):
-        message = event["text"]
-        await self.send(text_data=json.dumps(message))
-
-    async def send_last_message(self, event):
-        last_msg = await self.get_last_message(self.user_id)
-        last_msg["status"] = event["text"]
-        print(last_msg)
-        await self.send(text_data=json.dumps(last_msg))
-
-    @database_sync_to_async
-    def get_last_message(self, user_id):
-        message = Message.objects.filter(user_id=user_id).last()
-        return message.message
-
+        pass

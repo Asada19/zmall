@@ -30,9 +30,11 @@ class Token:
     lifetime = None
 
     def __init__(self, token=None):
-        self.token = token
-
         self.payload = {'token_type': self.token_type}
+        if token:
+            self.payload = decode_jwt(token)
+
+        self.token = token
         self.set_exp(start_time=datetime.now())
         self.set_iat(at_time=datetime.now())
 

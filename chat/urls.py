@@ -2,5 +2,5 @@ from django.urls import path, re_path
 from chat import views
 
 urlpatterns = [
-    re_path(r'message/', views.MessageSendAPIView.as_view(), name='message'),
+    path('create_chat_room/', views.CreateChatRoom.as_view(), name='create-chat-room'),
 ]
