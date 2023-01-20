@@ -47,10 +47,6 @@ class JWTAuthentication(authentication.BaseAuthentication):
         except:
             raise exceptions.AuthenticationFailed('Authentication error. Cannot decode token')
 
-
-        # if payload['exp'] > timezone.now():
-        #     raise exceptions.AuthenticationFailed('Token has expired')
-
         try:
             user = User.objects.get(pk=payload['user'])
         except User.DoesNotExist:

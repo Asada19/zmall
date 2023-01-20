@@ -15,12 +15,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from advertisement.permissions import IsOwnerOrReadOnly, IsCommentOwner
 from core.db_management.debugger import query_debugger
-from core.db_management.queries import get_ads_filtered, get_comment_tree
+from core.db_management.queries import get_ads_filtered, create_chat_room
 from advertisement.models import Advertisement, Category, SubCategory, Promotion, AdvertisementPromotion, \
     AdvertisementImage, Favorite, AdvertisementStatistic, AdvertisementComment
 from advertisement.serializers import AdvertisementSerializer, CategorySerializer, SubCategorySerializer, \
     AdvertisementPromotionSerializer, AdvertisementImageSerializer, FavoriteSerializer, AdvertisementDetailSerializer, \
     PromotionDestroySerializer, StatisticSerializer, AdvertisementCommentSerializer
+from django.contrib.auth.models import AnonymousUser
 
 
 class AdvertisementListView(ListCreateAPIView):
@@ -83,6 +84,11 @@ class AdvertisementDetailAPIView(RetrieveUpdateDestroyAPIView):
     parser_classes = (MultiPartParser, FormParser)
     lookup_field = 'slug'
     serializer_class = AdvertisementDetailSerializer
+
+    def get(self, request, *args, **kwargs):
+        if self.request.user != AnonymousUser:
+            create_chat_room(self.get_object().id, self.request.user.id)
+        return self.retrieve(request, *args, **kwargs)
 
 
 class CategoryListAPIView(ListAPIView):

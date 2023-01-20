@@ -1,5 +1,6 @@
 import json
 import time
+from asgiref.sync import async_to_sync
 
 from core.db_management.connections.mongo_conn import get_collection_handle
 
@@ -24,6 +25,6 @@ class LoggingMiddleware:
         value = response.content
 
         collection_handle = get_collection_handle('logs')
-        collection_handle.insert_one({key: value})
+        async_to_sync(collection_handle.insert_one({key: value}))
 
         return response

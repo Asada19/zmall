@@ -1,6 +1,33 @@
 from django.db import connection
 
 from advertisement.models import Advertisement
+from core.db_management.connections.mongo_conn import get_collection_handle
+
+
+def create_chat_room(ad_id, user_id):
+    ads = get_collection_handle('ads')
+    if not ads.find_one({"ad_id": ad_id}):
+        ads.insert_one({
+            "ad_id": ad_id,
+            "chat_rooms": [
+                {
+                    "chat_room_id": user_id,
+                    "messages": []
+                }
+            ]
+        })
+    chatroom = ads.find_one({"ad_id": ad_id, "chat_rooms.chat_room_id": user_id})
+
+    if not chatroom:
+        ads.update_one(chatroom,
+                       {"$push":
+                           {"chat_rooms": {
+                               "chat_room_id": user_id,
+                               "messages": []
+                           }}
+                       })
+
+    print(chatroom)
 
 
 def get_ads_sorted(parameter, asc=True):
