@@ -21,8 +21,7 @@ class LoggingMiddleware:
             date=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
         )
 
-        # Logs
-        value = ""
+        value = response.content
 
         collection_handle = get_collection_handle('logs')
         collection_handle.insert_one({key: value})

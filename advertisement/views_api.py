@@ -61,6 +61,7 @@ class AdvertisementDetailAPIView(RetrieveUpdateDestroyAPIView):
     model = Advertisement
     parser_classes = (MultiPartParser, FormParser)
     serializer_class = AdvertisementSerializer
+    lookup_field = 'slug'
 
 
 class CategoryListAPIView(ListAPIView):
