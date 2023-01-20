@@ -43,13 +43,11 @@ class WebsocketTest(APITestCase):
         return obj.objects.get(pk=pk)
 
     def setUp(self):
-        # self.client.force_login(self.get_object())
         refresh = RefreshToken
 
         self.access_token_us1 = refresh.create(1).access_token.token
-        # print(self.access_token_us1)
         self.access_token_us2 = refresh.create(2).access_token.token
-        self.chat_room = '1-2'
+        self.chat_room = '1/2'
         self.complete_path = 'message/{}/?token={}'.format(self.chat_room, self.access_token_us1)
 
     async def test_can_connect_to_server(self):
@@ -70,3 +68,5 @@ class WebsocketTest(APITestCase):
         connected, _ = await communicator.connect()
         self.assertFalse(connected)
         await communicator.disconnect()
+
+

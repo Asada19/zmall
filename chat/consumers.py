@@ -8,18 +8,17 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 
 from advertisement.models import Advertisement
-# from chat.utils import write_chatroom_to_db, write_message_to_db
+from chat.utils import write_message_to_db
 
 User = get_user_model()
 
 
 @database_sync_to_async
-def get_object(obj, id):
+def get_owner(id):
     try:
-        return obj.objects.get(id=int(id))
+        return Advertisement.objects.get(id=int(id)).owner.id
     except ObjectDoesNotExist:
         return None
-
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -33,11 +32,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.user_id = self.scope['url_route']['kwargs']['user_id']
         self.room_name = f"{self.ad_id}-{self.user_id}"
 
-        advertisement = await get_object(Advertisement, self.ad_id)
+        advertisement = await get_owner(self.ad_id)
         if not advertisement:
             await self.close()
 
-        if self.scope["user"].id != int(self.user_id) and self.scope["user"].id != int(advertisement.owner.id):
+        if self.scope["user"].id != int(self.user_id) and self.scope["user"].id != int(advertisement):
             await self.close()
 
         await self.channel_layer.group_add(
@@ -45,11 +44,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-        await write_message_to_db(self.ad_id, "user_idr": self.user_id)
-
         await self.accept()
 
     async def receive(self, text_data):
+        await write_message_to_db(self.ad_id, self.user_id, text_data)
         await self.channel_layer.group_send(
             self.room_name,
             {"type": "chat_message",
