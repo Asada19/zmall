@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 
 from chat.seriailizers import ChatRoomSerializer
+from chat.utils import create_chat_room
 
 
 # class MessageSendAPIView(APIView):
@@ -35,13 +36,3 @@ from chat.seriailizers import ChatRoomSerializer
 #         )
 #
 #         return Response({"status": True}, status=status.HTTP_201_CREATED)
-
-class CreateChatRoom(APIView):
-
-    @swagger_auto_schema(request_body=ChatRoomSerializer)
-    def post(self, request):
-        serializer = ChatRoomSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            return Response(serializer.validated_data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-

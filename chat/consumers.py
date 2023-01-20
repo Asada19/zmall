@@ -5,6 +5,7 @@ from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
 
 from advertisement.models import Advertisement
 # from chat.utils import write_chatroom_to_db, write_message_to_db
@@ -13,11 +14,12 @@ User = get_user_model()
 
 
 @database_sync_to_async
-def get_advertisement(ad_id):
+def get_object(obj, id):
     try:
-        return Advertisement.objects.get(id=int(ad_id))
-    except:
+        return obj.objects.get(id=int(id))
+    except ObjectDoesNotExist:
         return None
+
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -27,9 +29,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if self.scope["user"] is AnonymousUser:
             await self.close()
 
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.ad_id, self.user_id = self.room_name.split("-")
-        advertisement = await get_advertisement(self.ad_id)
+        self.ad_id = self.scope['url_route']['kwargs']['ad_id']
+        self.user_id = self.scope['url_route']['kwargs']['user_id']
+        self.room_name = f"{self.ad_id}-{self.user_id}"
+
+        advertisement = await get_object(Advertisement, self.ad_id)
+        if not advertisement:
+            await self.close()
+
         if self.scope["user"].id != int(self.user_id) and self.scope["user"].id != int(advertisement.owner.id):
             await self.close()
 
@@ -38,8 +45,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-        # await write_chatroom_to_db({"advertisement": advertisement.id,
-        #                             "customer": self.user_id})
+        await write_message_to_db(self.ad_id, "user_idr": self.user_id)
 
         await self.accept()
 

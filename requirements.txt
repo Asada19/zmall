@@ -66,3 +66,4 @@ BeautifulSoup4==4.11.1
 google-auth==1.21.2
 django-storages==1.13.2
 motor==3.1.1
+transliterate==1.10.2
