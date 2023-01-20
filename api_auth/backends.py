@@ -38,6 +38,9 @@ class JWTAuthentication(authentication.BaseAuthentication):
         return self._authenticate_credentials(request, token)
 
     def _authenticate_credentials(self, request, token):
+        print(token)
+        print('TRYING TO DECODE TOKEN')
+        print(decode_jwt(token))
 
         try:
             payload = decode_jwt(token)

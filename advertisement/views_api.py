@@ -1,8 +1,10 @@
+from datetime import datetime, timedelta
+
+import django_filters
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status
-from rest_framework.decorators import action
+from rest_framework import status, filters
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import RetrieveAPIView, ListAPIView, ListCreateAPIView, RetrieveUpdateAPIView, \
+from rest_framework.generics import RetrieveAPIView, ListAPIView, ListCreateAPIView, \
     RetrieveUpdateDestroyAPIView, CreateAPIView, DestroyAPIView
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.pagination import LimitOffsetPagination
@@ -10,15 +12,15 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from drf_yasg import openapi
 from rest_framework.response import Response
-
-from advertisement.permissions import IsOwnerOrReadOnly
+from rest_framework.views import APIView
+from advertisement.permissions import IsOwnerOrReadOnly, IsCommentOwner
 from core.db_management.debugger import query_debugger
 from core.db_management.queries import get_ads_filtered, create_chat_room
 from advertisement.models import Advertisement, Category, SubCategory, Promotion, AdvertisementPromotion, \
-    AdvertisementImage, Favorite
+    AdvertisementImage, Favorite, AdvertisementStatistic, AdvertisementComment
 from advertisement.serializers import AdvertisementSerializer, CategorySerializer, SubCategorySerializer, \
-    PromotionSerializer, AdvertisementPromotionSerializer, AdvertisementImageSerializer, FavoriteSerializer, \
-    AdvertisementDetailSerializer, PromotionDestroySerializer
+    AdvertisementPromotionSerializer, AdvertisementImageSerializer, FavoriteSerializer, AdvertisementDetailSerializer, \
+    PromotionDestroySerializer, StatisticSerializer, AdvertisementCommentSerializer
 from django.contrib.auth.models import AnonymousUser
 
 
@@ -183,4 +185,35 @@ class FavoriteDeleteAPIView(DestroyAPIView):
             return Response('Deleted', status=status.HTTP_204_NO_CONTENT)
         return Response('Advertisement does not exist in favorite', status=status.HTTP_404_NOT_FOUND)
 
+
+class ShowStatisticView(APIView):
+    def get(self, request, pk):
+        today = datetime.now()
+        one_month_ago = today - timedelta(days=30)
+        ad = Advertisement.objects.get(pk=pk)
+        views_by_day = {}
+        views = AdvertisementStatistic.objects.filter(advertisement=ad, created_on__gte=one_month_ago)
+        for view in views:
+            date = view.created_on.date()
+            if date in views_by_day:
+                views_by_day[date] += 1
+            else:
+                views_by_day[date] = 1
+        return Response({"title": ad.title, "views_by_day": views_by_day})
+
+
+class CommentAPIView(CreateAPIView):
+    serializer_class = AdvertisementCommentSerializer
+    permission_classes = [IsAuthenticated, ]
+    parser_classes = (MultiPartParser, FormParser)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class CommentDetailAPIView(RetrieveUpdateDestroyAPIView):
+    serializer_class = AdvertisementCommentSerializer
+    permission_classes = (IsAuthenticated, IsCommentOwner)
+    parser_classes = (MultiPartParser, FormParser)
+    queryset = AdvertisementComment.objects.all()
 

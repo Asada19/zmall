@@ -13,5 +13,4 @@ def unload_data():
     for i in ads:
         i.views += ads_views.get(i.id, 0)
     Advertisement.objects.bulk_update(ads, ['views'])
-    print(ads.values_list('views', flat=True))
     redis_db.flushdb()

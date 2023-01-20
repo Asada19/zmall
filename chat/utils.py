@@ -9,7 +9,6 @@ client = motor.motor_asyncio.AsyncIOMotorClient(
 db = client[settings.MONGO_INITDB_DATABASE]
 ads = db['ads']
 
-
 async def write_message_to_db(ad_id, user_id, message):
     chatroom = await ads.find_one({"ad_id": ad_id})
 
