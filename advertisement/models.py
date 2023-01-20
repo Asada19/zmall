@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
+from transliterate import translit
 
 from user.models import CustomUser
 # from cities.models import BaseCountry
@@ -15,20 +16,21 @@ def get_upload_path_head_image(instance, filename):
 
 class Category(models.Model):
     title = models.CharField(max_length=50)
-    slug = models.CharField(max_length=100, unique=True, blank=True, db_index=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True, db_index=True)
 
     def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title, allow_unicode=True)
+            slug = slugify(self.title, allow_unicode=True)
+            self.slug = translit(slug, "ru", reversed=True)
         return super().save(*args, **kwargs)
 
 
 class SubCategory(models.Model):
     title = models.CharField(max_length=50)
-    slug = models.CharField(max_length=100, unique=True, blank=True, db_index=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True, db_index=True)
     category = models.ForeignKey(to=Category, on_delete=models.CASCADE, related_name='sub_category')
 
     def __str__(self):
@@ -36,13 +38,15 @@ class SubCategory(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title, allow_unicode=True)
+            slug = slugify(self.title, allow_unicode=True)
+            self.slug = translit(slug, "ru", reversed=True)
         return super().save(*args, **kwargs)
 
 
 class Advertisement(models.Model):
 
     title = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=100, unique=True, blank=True, db_index=True)
     owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     description = models.TextField(max_length=500)
     sub_category = models.ForeignKey(to=SubCategory, on_delete=models.DO_NOTHING, related_name='advertisements')
@@ -59,6 +63,12 @@ class Advertisement(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            slug = slugify(self.title, allow_unicode=True)
+            self.slug = translit(slug, "ru", reversed=True)
+        return super().save(*args, **kwargs)
 
 
 class Promotion(models.Model):

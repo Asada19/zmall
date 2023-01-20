@@ -47,8 +47,8 @@ class AdvertisementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Advertisement
-        fields = ['id', 'title', 'description', 'sub_category', 'price',
-                  'max_price', 'views', 'city', 'end_date', 'created_on', 'images', 'promotion']
+        fields = ['id', 'title', 'slug', 'description', 'sub_category', 'price',
+                  'max_price', 'views', 'city', 'end_date', 'created_on', 'images', 'comments', 'promotions']
 
 
 class AdvertisementDetailSerializer(serializers.ModelSerializer):
@@ -69,7 +69,7 @@ class SubCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SubCategory
-        fields = ('id', 'category', 'title', "advertisements")
+        fields = ('id', 'category', 'title', 'slug', "advertisements")
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -77,7 +77,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ('id', 'title', 'sub_category')
+        fields = ('id', 'title', 'slug', 'sub_category')
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
