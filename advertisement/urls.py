@@ -16,5 +16,8 @@ urlpatterns = [
     path('sub-category/', SubCategoryListAPIView.as_view(), name='sub-category-list'),
     path('sub-category/<slug:slug>', SubCategoryDetailAPIView.as_view(), name='sub-category-detail'),
     path('favorites/', AdvertisementFavoriteAPIView.as_view(), name='favorite_list_create'),
-    path('favorite_delete/', FavoriteDeleteAPIView.as_view(), name='favorite_delete')
+    path('favorite_delete/', FavoriteDeleteAPIView.as_view(), name='favorite_delete'),
+    path('statistic/<int:pk>', ShowStatisticView.as_view(), name='statistic'),
+    path('comment', CommentAPIView.as_view(), name='comment'),
+    path('comment/<int:pk>', CommentDetailAPIView.as_view(), name='comment-detail'),
 ]
