@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Advertisement, AdvertisementImage, Category, SubCategory, AdvertisementPromotion, Promotion
+from .models import Advertisement, AdvertisementImage, Category, SubCategory, Promotion
 
 
 class AdvertisementAdmin(admin.ModelAdmin):
@@ -7,6 +7,7 @@ class AdvertisementAdmin(admin.ModelAdmin):
     list_filter = ('id', 'is_active', 'title', 'owner')
     search_fields = ('id', 'title',)
     ordering = ('-created_on', 'is_active')
+    prepopulated_fields = {"slug": ("title", )}
 
 
 # class AdvertisementImageAdmin(admin.ModelAdmin):
@@ -20,5 +21,4 @@ admin.site.register(Advertisement, AdvertisementAdmin)
 admin.site.register(AdvertisementImage)
 admin.site.register(Category)
 admin.site.register(SubCategory)
-admin.site.register(AdvertisementPromotion)
 admin.site.register(Promotion)

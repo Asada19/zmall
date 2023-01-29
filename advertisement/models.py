@@ -3,7 +3,6 @@ from django.utils.text import slugify
 from transliterate import translit
 
 from user.models import CustomUser
-# from cities.models import BaseCountry
 
 
 def get_upload_path_ad_image(instance, filename):
@@ -46,7 +45,7 @@ class SubCategory(models.Model):
 class Advertisement(models.Model):
 
     title = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=100, unique=True, blank=True, db_index=True)
+    slug = models.SlugField(max_length=255, unique=True, blank=True, db_index=True)
     owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     description = models.TextField(max_length=500)
     sub_category = models.ForeignKey(to=SubCategory, on_delete=models.DO_NOTHING, related_name='advertisements')
@@ -71,18 +70,26 @@ class Advertisement(models.Model):
         return super().save(*args, **kwargs)
 
 
+class PromoType(models.TextChoices):
+    vip = "vip", "VIP"
+    urgently = "urgently", "Срочно"
+    highlighted = "highlighted", "Выделить"
+
+
 class Promotion(models.Model):
     name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    types = models.CharField(max_length=50, choices=PromoType.choices, blank=True, null=True)
     price = models.FloatField()
 
 
-class AdvertisementPromotion(models.Model):
-    advertisement = models.ForeignKey(to=Advertisement, on_delete=models.PROTECT, related_name='promotion')
-    promotion = models.ForeignKey(to=Promotion, on_delete=models.CASCADE, related_name='sub_promotion')
+# class AdvertisementPromotion(models.Model):
+#     advertisement = models.ForeignKey(to=Advertisement, on_delete=models.PROTECT, related_name='promotions')
+#     promotion = models.ForeignKey(to=Promotion, on_delete=models.CASCADE, related_name='sub_promotion')
 
 
 class AdvertisementImage(models.Model):
-    advertisement = models.ForeignKey(Advertisement, on_delete=models.CASCADE, related_name='images')
+    advertisement = models.ForeignKey(Advertisement, related_name='images', on_delete=models.CASCADE, null=True)
     image = models.FileField(upload_to=get_upload_path_ad_image, blank=True, null=True)
 
 
@@ -104,8 +111,8 @@ class Favorite(models.Model):
 
 class AdvertisementStatistic(models.Model):
     advertisement = models.ForeignKey(Advertisement, on_delete=models.CASCADE, related_name="statistic")
-    created_on = models.DateTimeField(auto_now=True)
-    ad_views = models.IntegerField()
+    created_on = models.DateTimeField(auto_now_add=True)
+    ad_views = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.advertisement.id}-{self.created_on}"

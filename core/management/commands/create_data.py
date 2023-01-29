@@ -26,6 +26,7 @@ class Command(BaseCommand):
             for i in range(20):
                 counter = counter + 1
                 ads.append(Advertisement(title=f'Ads{counter}',
+                                         slug=f'Ads{counter}{random.randint(1, 9999)}',
                                          owner_id=1,
                                          description='hello',
                                          sub_category=sub,
