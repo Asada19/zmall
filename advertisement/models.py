@@ -83,9 +83,9 @@ class Promotion(models.Model):
     price = models.FloatField()
 
 
-# class AdvertisementPromotion(models.Model):
-#     advertisement = models.ForeignKey(to=Advertisement, on_delete=models.PROTECT, related_name='promotions')
-#     promotion = models.ForeignKey(to=Promotion, on_delete=models.CASCADE, related_name='sub_promotion')
+class AdvertisementPromotion(models.Model):
+    advertisement = models.ForeignKey(to=Advertisement, on_delete=models.PROTECT, related_name='promotions')
+    promotion = models.ForeignKey(to=Promotion, on_delete=models.CASCADE, related_name='sub_promotion')
 
 
 class AdvertisementImage(models.Model):

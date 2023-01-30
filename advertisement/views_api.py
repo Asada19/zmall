@@ -1,12 +1,9 @@
-from datetime import datetime, timedelta
-
-from django.core.serializers import get_serializer
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status, filters
+from rest_framework import status
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import RetrieveAPIView, ListAPIView, ListCreateAPIView, \
     RetrieveUpdateDestroyAPIView, CreateAPIView, DestroyAPIView
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser, FileUploadParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from drf_yasg import openapi
@@ -20,13 +17,13 @@ from advertisement.models import Advertisement, Category, SubCategory, Promotion
     AdvertisementImage, Favorite, AdvertisementStatistic, AdvertisementComment
 from advertisement.serializers import AdvertisementSerializer, CategorySerializer, SubCategorySerializer, \
     AdvertisementImageSerializer, FavoriteSerializer, AdvertisementDetailSerializer, \
-    AdvertisementCommentSerializer, PromotionSerializer, MyAutoSchema, StatisticSerializer
+    AdvertisementCommentSerializer, PromotionSerializer, StatisticSerializer
 from django.contrib.auth.models import AnonymousUser
 
 
 class AdvertisementListView(ListCreateAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly, )
-    parser_classes = (MultiPartParser, FormParser, FileUploadParser)
+    # parser_classes = (MultiPartParser, FormParser, FileUploadParser)
     filter_backends = (SearchFilter, )
     serializer_class = AdvertisementSerializer
     pagination_class = LimitOffsetPagination
@@ -58,7 +55,9 @@ class AdvertisementListView(ListCreateAPIView):
         return self.list(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        instance = serializer.save(owner=self.request.user)
+        if self.request.user != AnonymousUser:
+            create_chat_room(instance.id, self.request.user.id)
 
 
 class OnModerationAPIView(ListAPIView):
@@ -95,17 +94,12 @@ class AdvertisementImageAPIView(APIView):
 
 
 class AdvertisementDetailAPIView(RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+    permission_classes = (IsAuthenticatedOrReadOnly, )
+    lookup_field = 'slug'
     queryset = Advertisement.objects.all()
     model = Advertisement
     parser_classes = (MultiPartParser, FormParser)
-    lookup_field = 'slug'
     serializer_class = AdvertisementDetailSerializer
-
-    def get(self, request, *args, **kwargs):
-        if self.request.user != AnonymousUser:
-            create_chat_room(self.get_object().id, self.request.user.id)
-        return self.retrieve(request, *args, **kwargs)
 
 
 class CategoryListAPIView(ListAPIView):

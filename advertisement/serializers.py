@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.response import Response
 
 from advertisement.models import Advertisement, Category, SubCategory, AdvertisementImage, AdvertisementComment, \
-    Promotion, Favorite, AdvertisementStatistic
+    Promotion, Favorite, AdvertisementStatistic, AdvertisementPromotion
 from django.utils import timezone
 
 User = get_user_model()
@@ -14,6 +14,14 @@ class PromotionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Promotion
         fields = ['id', 'name', 'price', 'types']
+
+
+class AdsPromoSerializer(serializers.ModelSerializer):
+    promotion = PromotionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = AdvertisementPromotion
+        fields = ['id', 'promotion']
 
 
 class RecursiveSerializer(serializers.Serializer):
@@ -47,39 +55,31 @@ class AdvertisementSerializer(serializers.ModelSerializer):
     views = serializers.IntegerField(read_only=True)
     created_on = serializers.DateTimeField(read_only=True)
     images = AdvertisementImageSerializer(many=True, read_only=True)
+    promotions = AdsPromoSerializer(many=True, read_only=True)
     upload_images = serializers.ListField(
         child=serializers.FileField(max_length=100000, allow_empty_file=False, use_url=False),
-        write_only=True
+        write_only=True, required=False
     )
 
     class Meta:
         model = Advertisement
         fields = ['id', 'title', 'slug', 'description', 'sub_category', 'price',
-                  'max_price', 'views', 'city', 'end_date', 'created_on', 'upload_images', 'images']
+                  'max_price', 'views', 'city', 'end_date', 'created_on', 'upload_images',
+                  'images', 'promotions']
 
         extra_kwargs = {
             "upload_images": {
                 "required": False,
             },
-}
+        }
 
     def create(self, validated_data):
-        upload_images = validated_data.pop('upload_images')
+        upload_images = validated_data.pop('upload_images', None)
         advertisement = Advertisement.objects.create(**validated_data)
-        for image in upload_images:
-            AdvertisementImage.objects.create(advertisement=advertisement, image=image)
+        if upload_images:
+            for image in upload_images:
+                AdvertisementImage.objects.create(advertisement=advertisement, image=image)
         return advertisement
-
-
-class MyAutoSchema(SwaggerAutoSchema):
-    def get_request_body_parameters(self, operation_keys=None):
-        parameters = super().get_request_body_parameters(operation_keys)
-        for parameter in parameters:
-            if parameter["name"] == "upload_images":
-                parameter["in"] = "formData"
-                parameter["type"] = "file"
-                parameter["collectionFormat"] = "multi"
-        return parameters
 
 
 class AdvertisementDetailSerializer(serializers.ModelSerializer):
@@ -91,11 +91,10 @@ class AdvertisementDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Advertisement
         fields = ['id', 'title', 'description', 'sub_category', 'price',
-                  'max_price', 'views', 'city', 'end_date', 'created_on', 'images', 'comments', 'promotion']
+                  'max_price', 'views', 'city', 'end_date', 'created_on', 'images', 'comments']
 
 
 class SubCategorySerializer(serializers.ModelSerializer):
-
     class Meta:
         model = SubCategory
         fields = ('id', 'category', 'title', 'slug')
@@ -119,4 +118,3 @@ class StatisticSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdvertisementStatistic
         fields = '__all__'
-
